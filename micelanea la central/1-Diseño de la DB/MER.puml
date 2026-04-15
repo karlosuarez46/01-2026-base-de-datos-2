@@ -1,0 +1,154 @@
+@startuml
+
+entity "categorias" as CAT {
+    * id: INT <<PK>>
+    --
+    nombre: VARCHAR(100)
+    descripcion: VARCHAR(255)
+}
+
+entity "productos" as PRO {
+    * id : INT <<PK>>
+    --
+    * categoria_id : INT <<FK>>
+    nombre : VARCHAR(150)
+    precio_compra : DECIMAL(10,2)
+    precio_venta_detal : DECIMAL(10,2)
+    precio_venta_mayor : DECIMAL(10,2)
+    stock : INT
+    stock_minimo : INT
+    activo : BOOLEAN
+
+}
+
+entity "clientes" as CLI {
+    * id : INT <<PK>>
+    --
+    nombre : VARCHAR(150)
+    telefono : VARCHAR(20)
+    direccion : VARCHAR(255)
+    tipo : ENUM(detal, mayor)
+    credito_habilitado : BOOLEAN
+    limite_credito : DECIMAL(10,2)
+    saldo_deuda : DECIMAL(10,2)
+}
+
+entity "proveedores" as PRV {
+    * id : INT <<PK>>
+    --
+    nombre : VARCHAR(150)
+    telefono : VARCHAR(20)
+    direccion : VARCHAR(255)
+    ofrece_credito : BOOLEAN
+    saldo_pendiente : DECIMAL(10,2)
+}
+
+entity "ventas" as VEN {
+    * id : INT <<PK>>
+    --
+    cliente_id : INT <<FK>>
+    fecha : DATE
+    tipo : ENUM(detal, mayor)
+    total : DECIMAL(10,2)
+    estado_pago : ENUM(pagado, credito, parcial)
+    observaciones : VARCHAR(255)
+}
+
+entity "detalle_ventas" as DVEN {
+    * id : INT <<PK>>
+    --
+    * venta_id : INT <<FK>>
+    * producto_id : INT <<FK>>
+    cantidad : INT
+    precio_unitario : DECIMAL(10,2)
+    subtotal : DECIMAL(10,2)
+}
+
+entity "compras" as COM {
+    * id : INT <<PK>>
+    --
+    * proveedor_id : INT <<FK>>
+    fecha : DATE
+    total : DECIMAL(10,2)
+    estado_pago : ENUM(pagado, credito, parcial)
+    observaciones : VARCHAR(255)
+}
+
+entity "detalle_compras" as DCOM {
+    * id : INT <<PK>>
+    --
+    * compra_id : INT <<FK>>
+    * producto_id : INT <<FK>>
+    cantidad : INT
+    precio_unitario : DECIMAL(10,2)
+    subtotal : DECIMAL(10,2)
+}
+
+entity "abonos_clientes" as ABOC {
+    * id : INT <<PK>>
+    --
+    * cliente_id : INT <<FK>>
+    * venta_id : INT <<FK>>
+    fecha : DATE
+    monto : DECIMAL(10,2)
+    observaciones : VARCHAR(255)
+}
+
+entity "abonos_proveedores" as ABOP {
+    * id : INT <<PK>>
+    --
+    * proveedor_id : INT <<FK>>
+    * compra_id : INT <<FK>>
+    fecha : DATE
+    monto : DECIMAL(10,2)
+    observaciones : VARCHAR(255)
+}
+
+entity "trabajadores" as TRA {
+    * id : INT <<PK>>
+    --
+    nombre : VARCHAR(150)
+    cargo : VARCHAR(100)
+    salario : DECIMAL(10,2)
+    fecha_ingreso : DATE
+    activo : BOOLEAN
+}
+
+entity "tipos_gasto" as TGS {
+    * id : INT <<PK>>
+    --
+    nombre : VARCHAR(100)
+    descripcion : VARCHAR(255)
+}
+
+entity "gastos" as GAS {
+    * id : INT <<PK>>
+    --
+    * tipo_gasto_id : INT <<FK>>
+    fecha : DATE
+    monto : DECIMAL(10,2)
+    descripcion : VARCHAR(255)
+}
+
+
+CAT ||--o{ PRO : "clasifica"
+
+PRO ||--o{ DVEN : "incluido en"
+PRO ||--o{ DCOM : "incluido en"
+
+CLI ||--o{ VEN : "realiza"
+CLI ||--o{ ABOC : "realiza abono"
+
+VEN ||--o{ DVEN : "contiene"
+VEN ||--o{ ABOC : "recibe abonos"
+
+PRV ||--o{ COM : "suministra"
+PRV ||--o{ ABOP : "recibe abono"
+
+COM ||--o{ DCOM : "contiene"
+COM ||--o{ ABOP : "recibe abonos"
+
+TGS ||--o{ GAS : "clasifica"
+
+
+@enduml
